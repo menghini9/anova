@@ -1,38 +1,104 @@
-// ⬇️ BLOCCO 1 — Test connessione Firebase
 "use client";
 
-import { useEffect, useState } from "react";
-import { initializeApp } from "firebase/app";
+import { useState, useEffect } from "react";
+import {
+  getAllNotizieMock as getAllNotizie,
+  aggiungiNotiziaMock as aggiungiNotizia,
+  eliminaNotiziaMock as eliminaNotizia,
+} from "../firebase/mockFirestore";
 
-// Importa le variabili d’ambiente
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+export default function ArchivioNotizie() {
+  const [notizie, setNotizie] = useState<any[]>([]);
+  const [titolo, setTitolo] = useState("");
+  const [contenuto, setContenuto] = useState("");
+  const [caricamento, setCaricamento] = useState(true);
 
-export default function TestFirebase() {
-  const [status, setStatus] = useState("Inizializzazione...");
-
+  // ⚡ Carica tutte le notizie quando la pagina viene aperta
   useEffect(() => {
-    try {
-      const app = initializeApp(firebaseConfig);
-      console.log("✅ Firebase connesso:", app.name);
-      setStatus("✅ Connessione riuscita: " + app.name);
-    } catch (error) {
-      console.error("❌ Errore Firebase:", error);
-      setStatus("❌ Errore di connessione — controlla la console");
-    }
+    const fetchData = async () => {
+      const data = await getAllNotizie();
+      setNotizie(data);
+      setCaricamento(false);
+    };
+    fetchData();
   }, []);
 
+  // ➕ Aggiunge una nuova notizia
+  const handleAggiungi = async () => {
+    if (!titolo.trim() || !contenuto.trim()) return;
+    const nuova = await aggiungiNotizia(titolo, contenuto);
+    setNotizie((prev) => [nuova, ...prev]);
+    setTitolo("");
+    setContenuto("");
+  };
+
+  // ❌ Elimina una notizia per ID
+  const handleElimina = async (id: string) => {
+    await eliminaNotizia(id);
+    setNotizie((prev) => prev.filter((n) => n.id !== id));
+  };
+
   return (
-    <div style={{ padding: "40px", fontFamily: "monospace" }}>
-      <h2>Test Firebase</h2>
-      <p>{status}</p>
+    <div className="min-h-screen flex flex-col items-center justify-start bg-black text-white p-6">
+      <h1 className="text-3xl font-semibold mb-6 flex items-center gap-2">
+        📰 Archivio Notizie Anova
+      </h1>
+
+      {/* 🟢 Form Inserimento */}
+      <div className="bg-neutral-900 rounded-2xl p-6 shadow-lg w-full max-w-md mb-10">
+        <input
+          type="text"
+          placeholder="Titolo notizia"
+          value={titolo}
+          onChange={(e) => setTitolo(e.target.value)}
+          className="w-full mb-4 p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+        />
+        <textarea
+          placeholder="Contenuto..."
+          value={contenuto}
+          onChange={(e) => setContenuto(e.target.value)}
+          rows={4}
+          className="w-full mb-4 p-3 rounded-lg bg-neutral-800 border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-green-600"
+        />
+        <button
+          onClick={handleAggiungi}
+          className="w-full py-3 rounded-lg bg-green-600 hover:bg-green-500 text-lg font-semibold transition"
+        >
+          Aggiungi Notizia
+        </button>
+      </div>
+
+      {/* 🔵 Elenco Notizie */}
+      <div className="w-full max-w-2xl space-y-4">
+        {caricamento ? (
+          <p className="text-gray-400 text-center">Caricamento...</p>
+        ) : notizie.length === 0 ? (
+          <p className="text-gray-500 text-center">
+            Nessuna notizia presente.
+          </p>
+        ) : (
+          notizie.map((n) => (
+            <div
+              key={n.id}
+              className="bg-neutral-900 p-5 rounded-2xl shadow-md border border-neutral-800 flex justify-between items-start"
+            >
+              <div>
+                <h2 className="text-lg font-semibold">{n.titolo}</h2>
+                <p className="text-gray-400 mt-1">{n.contenuto}</p>
+                <p className="text-gray-600 text-sm mt-2">{n.data}</p>
+              </div>
+              <button
+                onClick={() => handleElimina(n.id)}
+                className="ml-4 text-red-500 hover:text-red-400 font-bold text-xl"
+                title="Elimina notizia"
+              >
+                ×
+              </button>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
-// ⬆️ FINE BLOCCO 1
+// ⬆️ FINE BLOCCO 2
