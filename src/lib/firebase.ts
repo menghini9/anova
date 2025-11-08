@@ -1,8 +1,11 @@
-// ⬇️ BLOCCO 1 — Configurazione completa Firebase + Firestore
+// ⬇️ BLOCCO 6.2 — Configurazione Firebase principale (Anova β)
+
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
-// ⚙️ Lettura variabili sicura da .env.local
+// ⚙️ Configurazione Firebase — legge le variabili dal file .env.local
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -12,13 +15,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// ✅ Evita di inizializzare Firebase più volte
+// 🔒 Evita errori di inizializzazione multipla (Next.js ricarica spesso)
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// 🔥 Inizializza Firestore
-export const db = getFirestore(app);
-
-// 🧠 Esporta app principale se serve in altri moduli (Auth, Storage, ecc.)
+// 🧠 Moduli principali — esportati per tutto il progetto
+export const db = getFirestore(app);       // Database Firestore
+export const auth = getAuth(app);          // Autenticazione utenti
+export const storage = getStorage(app);    // File e contenuti
 export default app;
 
-// ⬆️ FINE BLOCCO 1
+// ⬆️ FINE BLOCCO 6.2
