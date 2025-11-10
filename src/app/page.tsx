@@ -1,5 +1,7 @@
-// ⬇️ BLOCCO 3 — HomePage Beta (Full Screen Fix + Layout Integration)
+
 "use client";
+// ⬇️ BLOCCO 3 — HomePage Beta (Full Screen Fix + Layout Integration)
+
 
 import Link from "next/link";
 
