@@ -1,5 +1,7 @@
-// ⬇️ BLOCCO 14.0 — ANOVA β Chat v3.7 (Completa + Firestore Totale Reale + Rinomina + Ricerca + Archivio + Cestino)
 "use client";
+
+// ⬇️ BLOCCO 14.0 — ANOVA β Chat v3.7 (Completa + Firestore Totale Reale + Rinomina + Ricerca + Archivio + Cestino)
+
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
