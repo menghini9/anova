@@ -1,0 +1,40 @@
+#!/bin/bash
+# ===========================================================
+# 🔵 ANOVA β — Sistema di sicurezza merge intelligente
+# Controlla conflitti e impedisce merge sporchi o non sicuri
+# ===========================================================
+
+# Messaggio iniziale
+echo ""
+echo "🧠  Avvio controllo merge automatico..."
+echo "-------------------------------------------"
+
+# Controlla se ci sono conflitti in corso
+if git diff --check --cached | grep -q "conflict"; then
+  echo "❌ Conflitti di merge rilevati! Risolvili prima di procedere."
+  echo "-------------------------------------------"
+  exit 1
+fi
+
+# Controlla se ci sono file non aggiunti
+if ! git diff --quiet; then
+  echo "⚠️  Ci sono modifiche locali non committate."
+  echo "👉  Esegui prima: git add . && git commit -m 'messaggio'"
+  echo "-------------------------------------------"
+  exit 1
+fi
+
+# Controlla se la branch è aggiornata con main
+git fetch origin main >/dev/null 2>&1
+if ! git diff --quiet HEAD origin/main; then
+  echo "⚠️  Il branch locale non è aggiornato con 'main'."
+  echo "👉  Esegui prima: git pull origin main"
+  echo "-------------------------------------------"
+  exit 1
+fi
+
+# Se tutto è ok
+echo "✅ Nessun conflitto o problema rilevato."
+echo "✅ Merge consentito."
+echo "-------------------------------------------"
+exit 0
