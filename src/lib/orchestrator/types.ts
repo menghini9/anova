@@ -1,0 +1,52 @@
+// ⬇️ BLOCCO 1 — /src/lib/orchestrator/types.ts
+// ANOVA_ORCHESTRATOR_V42
+
+export type ProviderId = "openai" | "anthropic" | "gemini" | "mistral" | "llama" | "web";
+
+export type Domain =
+  | "logic"
+  | "code"
+  | "creative"
+  | "factual"
+  | "strategy";
+
+export interface Intent {
+  purpose: Domain;          // es. "code"
+  tone: "concise" | "neutral" | "rich";
+  complexity: "low" | "medium" | "high";
+  keywords: string[];
+  original: string;         // prompt originale utente
+  userId?: string;
+}
+
+export interface ProviderResponse {
+  provider: ProviderId;
+  text: string;
+  latencyMs: number;
+  success: boolean;
+  error?: string;
+}
+
+export interface FusionResult {
+  finalText: string;
+  fusionScore: number;      // 0..1
+  used: Array<{ provider: ProviderId; score: number; latencyMs: number }>;
+}
+
+export interface UserProfile {
+  userId: string;
+  prefs?: {
+    prefer?: Partial<Record<Domain, ProviderId[]>>;
+    tone?: Intent["tone"];
+    detail?: "low" | "medium" | "high";
+  };
+}
+
+export interface PerformanceSample {
+  provider: ProviderId;
+  domain: Domain;
+  score: number;      // 0..1
+  latencyMs: number;
+  ts: number;
+}
+// ⬆️ FINE BLOCCO 1

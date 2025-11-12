@@ -507,19 +507,42 @@ export default function ChatPage() {
     setInput("");
     await new Promise((r) => setTimeout(r, 420));
 
-    const aiResponse = generateLocalResponse(trimmed);
-    await addDoc(messagesRef, {
-      sender: "anova",
-      text: aiResponse,
-      createdAt: serverTimestamp(),
-    });
-    incWrite(2);
+   // ⬇️ BLOCCO 15 — Collegamento Anova β Orchestrator v4.2
+let aiResponse = "Elaborazione in corso...";
 
-    await updateDoc(doc(db, "sessions", sessionId), {
-      updatedAt: serverTimestamp(),
-      lastMessage: aiResponse,
-    });
-    incWrite();
+try {
+  const res = await fetch("/api/orchestrate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: trimmed, userId: sessionId }),
+  });
+
+  const data = await res.json();
+
+  aiResponse =
+    data?.fusion?.finalText ||
+    "⚠️ Nessuna risposta utile dall'orchestratore.";
+
+  console.log("🧠 ANOVA β — Risposta fusa:", data.fusion);
+} catch (err) {
+  console.error("Errore chiamata orchestratore:", err);
+  aiResponse = "❌ Errore nel motore cognitivo. Riprova.";
+}
+
+// salva la risposta fusa nel thread
+await addDoc(messagesRef, {
+  sender: "anova",
+  text: aiResponse,
+  createdAt: serverTimestamp(),
+});
+incWrite(2);
+
+await updateDoc(doc(db, "sessions", sessionId), {
+  updatedAt: serverTimestamp(),
+  lastMessage: aiResponse,
+});
+incWrite();
+// ⬆️ FINE BLOCCO 15
 
     // aggiorna cache
     cacheRef.current[sessionId] = {
